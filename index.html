@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NetCreators Automation – Complete Hotel Automation Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .bg-shapes { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(124, 58, 237, 0.15);
+            animation: float 12s infinite alternate ease-in-out;
+        }
+        .shape:nth-child(1) { width: 300px; height: 300px; top: -80px; left: -80px; animation-duration: 14s; }
+        .shape:nth-child(2) { width: 400px; height: 400px; bottom: -120px; right: -100px; background: rgba(20, 184, 166, 0.12); animation-duration: 16s; }
+        .shape:nth-child(3) { width: 200px; height: 200px; top: 40%; right: 10%; background: rgba(124, 58, 237, 0.1); animation-duration: 10s; }
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, -40px) scale(1.1); }
+        }
+        .counter { font-variant-numeric: tabular-nums; }
+        .product-card { transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; }
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.2); }
+        .scroll-indicator { animation: bounce 2s infinite; }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-12px); }
+            60% { transform: translateY(-6px); }
+        }
+        .badge-new { background: #10b981; color: white; font-size: 0.65rem; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 9999px; letter-spacing: 0.5px; }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: white;
+            max-width: 860px;
+            width: 100%;
+            max-height: 92vh;
+            overflow-y: auto;
+            border-radius: 2rem;
+            padding: 2rem;
+            position: relative;
+            animation: modalFade 0.3s ease;
+        }
+        @keyframes modalFade {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-close {
+            position: sticky;
+            top: 0;
+            float: right;
+            background: #f3f4f6;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 9999px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: -0.5rem;
+            margin-right: -0.5rem;
+            z-index: 10;
+        }
+        .modal-close:hover { background: #e5e7eb; }
+        .modal-box h3 { font-size: 2rem; font-weight: 700; color: #1f2937; margin-top: 0.5rem; }
+        .modal-box h4 { font-weight: 700; color: #7C3AED; margin-top: 1.5rem; margin-bottom: 0.3rem; font-size: 1.1rem; }
+        .modal-box ul { list-style: disc; padding-left: 1.5rem; color: #4b5563; line-height: 1.8; }
+        .modal-box p { color: #4b5563; line-height: 1.8; }
+
+        .modal-box .product-image {
+            width: 100%;
+            max-height: 380px;
+            object-fit: contain;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            background: #f3f4f6;
+            display: block;
+        }
+        .video-thumb {
+            position: relative;
+            cursor: pointer;
+            border-radius: 1rem;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .video-thumb img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .video-thumb .play-icon {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(124, 58, 237, 0.85);
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            transition: transform 0.2s;
+        }
+        .video-thumb .play-icon:hover { transform: translate(-50%, -50%) scale(1.1); }
+        .video-thumb .play-icon i { margin-left: 4px; }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="fixed top-0 left-0 w-full bg-white/80 backdrop-blur-md shadow-sm z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <img src="logo.png" alt="NetCreators Automation" class="h-12 w-auto" />
+                    <div class="flex items-baseline">
+                        <span class="text-2xl font-bold text-purple-700">NetCreators</span>
+                        <span class="ml-1 text-sm font-medium text-teal-600">Automation</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-8 text-gray-700 font-medium">
+                    <a href="#" class="hover:text-purple-700 transition">Home</a>
+                    <a href="#products" class="hover:text-purple-700 transition">Solutions</a>
+                    <a href="#about" class="hover:text-purple-700 transition">About</a>
+                    <a href="#contact" class="hover:text-purple-700 transition">Contact</a>
+                </div>
+                <div class="md:hidden">
+                    <button class="text-gray-700 focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-purple-50 via-white to-teal-50 pt-16">
+        <div class="bg-shapes"><div class="shape"></div><div class="shape"></div><div class="shape"></div></div>
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight">
+                Complete Automation Suite<br />
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-teal-500">for Modern Hotels</span>
+            </h1>
+            <p class="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-gray-600">
+                From Property Management &amp; Guest Feedback to Smart Inventory &amp; Energy Savings – one platform, endless possibilities.
+            </p>
+            <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+                <a href="#products" class="inline-flex items-center px-8 py-3 bg-purple-700 hover:bg-purple-800 text-white font-semibold rounded-full shadow-lg transition">
+                    Explore Solutions <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+                <a href="#" class="inline-flex items-center px-8 py-3 bg-white hover:bg-gray-50 text-purple-700 font-semibold rounded-full shadow-md transition border border-purple-200">
+                    <i class="fas fa-play-circle mr-2"></i> Watch Demo
+                </a>
+            </div>
+            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-gray-400 scroll-indicator">
+                <i class="fas fa-chevron-down text-2xl"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== STATS ===== -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="p-6 rounded-2xl bg-purple-50/50">
+                    <div class="text-4xl font-extrabold text-purple-700 counter" data-target="500">0</div>
+                    <div class="text-sm font-medium text-gray-500 mt-1">Hotels Automated</div>
+                    <span class="text-teal-600 text-sm">+</span>
+                </div>
+                <div class="p-6 rounded-2xl bg-teal-50/50">
+                    <div class="text-4xl font-extrabold text-teal-600 counter" data-target="42">0</div>
+                    <div class="text-sm font-medium text-gray-500 mt-1">Energy Savings (%)</div>
+                </div>
+                <div class="p-6 rounded-2xl bg-purple-50/50">
+                    <div class="text-4xl font-extrabold text-purple-700 counter" data-target="4.9">0</div>
+                    <div class="text-sm font-medium text-gray-500 mt-1">Customer Rating (out of 5)</div>
+                    <span class="text-yellow-400 text-sm">★★★★★</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PRODUCT GRID ===== -->
+    <section id="products" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Our Complete Product Range</h2>
+                <p class="mt-2 text-gray-500 max-w-2xl mx-auto">Click "Learn More" for detailed descriptions, images, videos, and full specifications.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- 1 -->
+                <div class="product-card bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div class="text-4xl mb-3">🏨</div>
+                    <h3 class="text-xl font-bold text-gray-800">Smart Room Controller</h3>
+                    <p class="text-gray-500 text-sm mt-1">Occupancy notifications &amp; remote lighting control.</p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <a href="#" onclick="openModal('modal-1')" class="text-sm font-medium text-purple-700 hover:underline">Learn more →</a>
+                        <a href="#" class="text-sm font-medium text-teal-600 hover:underline">Request demo</a>
+                    </div>
+                </div>
+                <!-- 2 -->
+                <div class="product-card bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div class="text-4xl mb-3">📱</div>
+                    <h3 class="text-xl font-bold text-gray-800">Room QR Code System</h3>
+                    <p class="text-gray-500 text-sm mt-1">Room service, food ordering &amp; guest services via QR.</p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <a href="#" onclick="openModal('modal-2')" class="text-sm font-medium text-purple-700 hover:underline">Learn more →</a>
+                        <a href="#" class="text-sm font-medium text-teal-600 hover:underline">Request demo</a>
+                    </div>
+                </div>
+                <!-- 3 -->
+                <div class="product-card bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div class="text-4xl mb-3">💎</div>
+                    <h3 class="text-xl font-bold text-gray-800">Loyalty Program</h3>
+                    <p class="text-gray-500 text-sm mt-1">Branded loyalty cards with a points system.</p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <a href="#" onclick="openModal('modal-3')" class="text-sm font-medium text-purple-700 hover:underline">Learn more →</a>
+                        <a href="#" class="text-sm font-medium text-teal-600 hover:underline">Request demo</a>
+                    </div>
+                </div>
+                <!-- 4 -->
+                <div class="product-card bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div class="text-4xl mb-3">✅</div>
+                    <h3 class="text-xl font-bold text-gray-800">Express CheckIN QR</h3>
+                    <p class="text-gray-500 text-sm mt-1">Streamlined check‑in with digital forms &amp; ID verification.</p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <a href="#" onclick="openModal('modal-4')" class="text-sm font-medium text-purple-700 hover:underline">Learn more →</a>
+                        <a href="#" class="text-sm font-medium text-teal-600 hover:underline">Request demo</a>
+                    </div>
+                </div>
+                <!-- 5 -->
+                <div class="product-card bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div class="text-4xl mb-3">🛎️</div>
+                    <h3 class="text-xl font-bold text-gray-800">Waiter Calling System</h3>
+                    <p class="text-gray-500 text-sm mt-1">AI‑based tabletop devices for instant service requests.</p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <a href="#" onclick="openModal('modal-5')" class="text-sm font-medium text-purple-700 hover:underline">Learn more →</a>
+                        <a href="#" class="text-sm font-medium text-teal-600 hover:underline">Request demo</a>
+                    </div>
+                </div>
+                <!-- 6 -->
+                <div class="product-card bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div class="text-4xl mb-3">🖥️</div>
+                    <h3 class="text-xl font-bold text-gray-800">Banquet LED Display</h3>
+                    <p class="text-gray-500 text-sm mt-1">Digital food displays for banquet events.</p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <a href="#" onclick="openModal('modal-6')" class="text-sm font-medium text-purple-700 hover:underline">Learn more →</a>
+                        <a href="#" class="text-sm font-medium text-teal-600 hover:underline">Request demo</a>
+                    </div>
+                </div>
+                <!-- 7 -->
+                <div class="product-card bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div class="text-4xl mb-3">🧺</div>
+                    <h3 class="text-xl font-bold text-gray-800">Laundry App</h3>
+                    <p class="text-gray-500 text-sm mt-1">Mobile app for laundry orders with Bluetooth printing.</p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <a href="#" onclick="openModal('modal-7')" class="text-sm font-medium text-purple-700 hover:underline">Learn more →</a>
+                        <a href="#" class="text-sm font-medium text-teal-600 hover:underline">Request demo</a>
+                    </div>
+                </div>
+                <!-- 8 PMS -->
+                <div class="product-card bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative">
+                    <span class="absolute top-3 right-3 badge-new">NEW</span>
+                    <div class="text-4xl mb-3">🏢</div>
+                    <h3 class="text-xl font-bold text-gray-800">Property Management System</h3>
+                    <p class="text-gray-500 text-sm mt-1">Complete PMS – reservations, channel manager, housekeeping, billing, AI voice.</p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <a href="#" onclick="openModal('modal-8')" class="text-sm font-medium text-purple-700 hover:underline">Learn more →</a>
+                        <a href="#" class="text-sm font-medium text-teal-600 hover:underline">Request demo</a>
+                    </div>
+                </div>
+                <!-- 9 Feedback -->
+                <div class="product-card bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative">
+                    <span class="absolute top-3 right-3 badge-new">NEW</span>
+                    <div class="text-4xl mb-3">📊</div>
+                    <h3 class="text-xl font-bold text-gray-800">Feedback Box</h3>
+                    <p class="text-gray-500 text-sm mt-1">5‑button physical box for guest satisfaction. Google Review or apology + dashboard.</p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <a href="#" onclick="openModal('modal-9')" class="text-sm font-medium text-purple-700 hover:underline">Learn more →</a>
+                        <a href="#" class="text-sm font-medium text-teal-600 hover:underline">Request demo</a>
+                    </div>
+                </div>
+                <!-- 10 RBI -->
+                <div class="product-card bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative">
+                    <span class="absolute top-3 right-3 badge-new">NEW</span>
+                    <div class="text-4xl mb-3">📦</div>
+                    <h3 class="text-xl font-bold text-gray-800">Recipe Based Inventory</h3>
+                    <p class="text-gray-500 text-sm mt-1">Auto‑deduct raw materials per food order, day‑end deficit to stores. Reduce waste.</p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <a href="#" onclick="openModal('modal-10')" class="text-sm font-medium text-purple-700 hover:underline">Learn more →</a>
+                        <a href="#" class="text-sm font-medium text-teal-600 hover:underline">Request demo</a>
+                    </div>
+                </div>
+                <!-- 11 TRL -->
+                <div class="product-card bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative">
+                    <span class="absolute top-3 right-3 badge-new">NEW</span>
+                    <div class="text-4xl mb-3">❄️</div>
+                    <h3 class="text-xl font-bold text-gray-800">Temperature Range Locker</h3>
+                    <p class="text-gray-500 text-sm mt-1">Locks AC between 22‑26°C, prevents overcooling, real‑time power savings.</p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <a href="#" onclick="openModal('modal-11')" class="text-sm font-medium text-purple-700 hover:underline">Learn more →</a>
+                        <a href="#" class="text-sm font-medium text-teal-600 hover:underline">Request demo</a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-12">
+                <p class="text-sm text-gray-400 italic">All products are available for demo. Contact us for a tailored solution.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== ABOUT SECTION (FINAL) ===== -->
+    <section id="about" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900">Who We Are</h2>
+                    <p class="mt-4 text-gray-600 leading-relaxed">
+                        <strong>NetCreators Automation</strong> is a pioneering technology company dedicated to transforming the hospitality industry through intelligent automation. We design and deliver cutting-edge solutions that enhance guest satisfaction, streamline operations, and drive profitability for hotels, resorts, and serviced apartments.
+                    </p>
+                    <p class="mt-4 text-gray-600 leading-relaxed">
+                        Our team combines deep industry knowledge with advanced AI, IoT, and cloud technologies to build reliable, scalable, and user-friendly systems. From property management and guest feedback to smart inventory and energy saving devices, we provide a complete automation ecosystem tailored to modern hospitality.
+                    </p>
+                    <p class="mt-4 text-gray-600 leading-relaxed">
+                        We believe in making technology accessible – with no heavy upfront investment, no AMC charges, and affordable monthly subscriptions. Our mission is to empower hoteliers with the tools they need to deliver exceptional guest experiences while optimizing costs.
+                    </p>
+                    <div class="mt-6 flex flex-wrap gap-4">
+                        <span class="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium"><i class="fas fa-check-circle mr-2"></i> 500+ Hotels Automated</span>
+                        <span class="inline-flex items-center px-4 py-2 bg-teal-100 text-teal-700 rounded-full text-sm font-medium"><i class="fas fa-check-circle mr-2"></i> 42% Energy Savings</span>
+                        <span class="inline-flex items-center px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium"><i class="fas fa-check-circle mr-2"></i> 4.9/5 Customer Rating</span>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-purple-100 to-teal-100 rounded-3xl p-8 text-center shadow-lg">
+                    <i class="fas fa-hotel text-7xl text-purple-700 opacity-60"></i>
+                    <p class="mt-4 text-gray-700 font-medium text-lg">Smarter hotels, happier guests.</p>
+                    <p class="mt-2 text-gray-600 text-sm">Innovation · Reliability · Excellence</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TESTIMONIALS ===== -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold text-gray-900">What Our Clients Say</h2>
+            <div class="mt-12 grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="text-yellow-400 text-xl">★★★★★</div>
+                    <p class="mt-4 text-gray-600 italic">"The Smart Room Controller cut our energy costs by 30% and guests love the convenience."</p>
+                    <div class="mt-6 font-semibold text-gray-800">— Rajesh Patel, GM, Grand Palace Hotel</div>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="text-yellow-400 text-xl">★★★★★</div>
+                    <p class="mt-4 text-gray-600 italic">"Express CheckIN QR slashed our front desk wait times by half. A game‑changer."</p>
+                    <div class="mt-6 font-semibold text-gray-800">— Priya Sharma, Operations Head, Oceanic Resort</div>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="text-yellow-400 text-xl">★★★★★</div>
+                    <p class="mt-4 text-gray-600 italic">"The Waiter Calling system improved our restaurant service speed significantly."</p>
+                    <div class="mt-6 font-semibold text-gray-800">— Anil Kumar, F&B Manager, City Inn</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CONTACT SECTION (FINAL) ===== -->
+    <section id="contact" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14">
+                <h2 class="text-3xl font-bold text-gray-900">Get in Touch</h2>
+                <p class="mt-2 text-gray-500 max-w-2xl mx-auto">Have questions, want a demo, or need a custom solution? We'd love to hear from you.</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-12">
+                <!-- Contact Details -->
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900">Contact Information</h3>
+                    <div class="mt-6 space-y-4">
+                        <div class="flex items-start space-x-4">
+                            <i class="fas fa-map-marker-alt text-purple-700 text-xl mt-1 w-6"></i>
+                            <div>
+                                <p class="font-medium text-gray-800">Address</p>
+                                <p class="text-gray-600">NetCreators Automation<br />Mumbai, Maharashtra, India</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <i class="fas fa-phone text-purple-700 text-xl mt-1 w-6"></i>
+                            <div>
+                                <p class="font-medium text-gray-800">Phone</p>
+                                <p class="text-gray-600"><a href="tel:+919167584555" class="hover:text-purple-700">+91-9167584555</a></p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <i class="fas fa-envelope text-purple-700 text-xl mt-1 w-6"></i>
+                            <div>
+                                <p class="font-medium text-gray-800">Email</p>
+                                <p class="text-gray-600"><a href="mailto:info@netcreatorsautomation.in" class="hover:text-purple-700">info@netcreatorsautomation.in</a></p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <i class="fas fa-globe text-purple-700 text-xl mt-1 w-6"></i>
+                            <div>
+                                <p class="font-medium text-gray-800">Website</p>
+                                <p class="text-gray-600"><a href="https://www.netcreatorsautomation.in" target="_blank" class="hover:text-purple-700">netcreatorsautomation.in</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 flex space-x-4">
+                        <a href="#" class="w-12 h-12 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-full flex items-center justify-center transition"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="w-12 h-12 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-full flex items-center justify-center transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="w-12 h-12 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-full flex items-center justify-center transition"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <!-- Contact Form -->
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900">Send Us a Message</h3>
+                    <form class="mt-6 space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                            <input type="text" placeholder="John Doe" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                            <input type="email" placeholder="you@example.com" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                            <textarea rows="4" placeholder="Tell us about your requirements..." class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"></textarea>
+                        </div>
+                        <button type="submit" class="w-full px-8 py-3 bg-purple-700 hover:bg-purple-800 text-white font-semibold rounded-xl shadow-md transition">
+                            Send Message <i class="fas fa-paper-plane ml-2"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER (UPDATED WITH ALL LINKS) ===== -->
+    <footer class="bg-gray-900 text-gray-300 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-white font-bold text-lg">NetCreators Automation</h3>
+                    <p class="mt-2 text-sm">Complete automation for modern hospitality.</p>
+                    <div class="mt-4 flex space-x-4">
+                        <a href="#" class="hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="hover:text-white"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold">Quick Links</h4>
+                    <ul class="mt-2 space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-white transition">Home</a></li>
+                        <li><a href="#products" class="hover:text-white transition">Solutions</a></li>
+                        <li><a href="#about" class="hover:text-white transition">About</a></li>
+                        <li><a href="#contact" class="hover:text-white transition">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold">Support</h4>
+                    <ul class="mt-2 space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-white transition">Help Center</a></li>
+                        <li><a href="#" class="hover:text-white transition">Documentation</a></li>
+                        <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+                        <!-- NEW: Training & Recruitment -->
+                        <li><a href="https://elitehospitality.in.net" target="_blank" class="hover:text-white transition">Training &amp; Recruitment</a></li>
+                        <!-- NEW: Compliances (no link) -->
+                        <li class="text-gray-400">Compliances for the Hotel Industry</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold">Newsletter</h4>
+                    <p class="mt-2 text-sm">Stay updated with our latest innovations.</p>
+                    <div class="mt-4 flex">
+                        <input type="email" placeholder="Your email" class="flex-1 px-3 py-2 rounded-l-lg bg-gray-800 border border-gray-700 text-white focus:outline-none text-sm" />
+                        <button class="px-4 py-2 bg-purple-700 hover:bg-purple-800 rounded-r-lg text-white text-sm">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-10 pt-6 text-center text-sm text-gray-500">
+                &copy; 2026 NetCreators Automation. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========================================================== -->
+    <!-- ===== MODALS (All 11 Products – same as before) ===== -->
+    <!-- ========================================================== -->
+
+    <!-- Modal 1 -->
+    <div id="modal-1" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal(event)">&times;</button>
+            <img src="images/smartroom.png" alt="Smart Room Controller" class="product-image" />
+            <div class="text-5xl mb-1">🏨</div>
+            <h3>Smart Room Controller</h3>
+            <p class="mt-2">Intelligent automation for guest rooms that enhances comfort while saving energy. The Smart Room Controller uses advanced occupancy detection to automatically adjust lighting, temperature, and other room settings based on guest presence, delivering a personalized experience while reducing operational costs.</p>
+            <div class="video-thumb" onclick="openYouTube('D6XHV5a2hKo')">
+                <img src="images/smartroom.png" alt="Watch Video" />
+                <div class="play-icon"><i class="fas fa-play"></i></div>
+            </div>
+            <h4>Key Features</h4>
+            <ul>
+                <li><strong>Occupancy Detection:</strong> Automatically adjusts lighting and temperature based on guest presence using PIR sensors.</li>
+                <li><strong>Remote Lighting Control:</strong> Manage room lights via central dashboard or guest mobile app with preset scenes.</li>
+                <li><strong>Energy Saving Mode:</strong> Reduces power consumption by up to 30% when room is vacant.</li>
+                <li><strong>Guest Notifications:</strong> Sends alerts for room service requests, maintenance issues, or check-out reminders.</li>
+                <li><strong>Easy Integration:</strong> Works seamlessly with PMS, housekeeping, and other hotel systems via API.</li>
+            </ul>
+            <h4>Benefits</h4>
+            <ul>
+                <li>Cut energy costs by up to 30% annually.</li>
+                <li>Improve guest satisfaction with personalized comfort settings.</li>
+                <li>Reduce carbon footprint and support sustainability goals.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal 2 -->
+    <div id="modal-2" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal(event)">&times;</button>
+            <img src="images/qrcode.png" alt="Room QR Code System" class="product-image" />
+            <div class="text-5xl mb-1">📱</div>
+            <h3>Room QR Code System</h3>
+            <p class="mt-2">Contactless digital solutions for room service, food ordering, and guest requests. Each room gets a unique QR code that guests can scan with their phone to access hotel services instantly – no app download required.</p>
+            <div class="video-thumb" onclick="openYouTube('TwvD-gU4cdQ')">
+                <img src="images/qrcode.png" alt="Watch Video" />
+                <div class="play-icon"><i class="fas fa-play"></i></div>
+            </div>
+            <h4>Key Features</h4>
+            <ul>
+                <li><strong>Digital Menu:</strong> Guests scan QR code to view restaurant menu and place orders instantly.</li>
+                <li><strong>Room Service:</strong> Request housekeeping, laundry, maintenance, or extra amenities with a single scan.</li>
+                <li><strong>Guest Services:</strong> Access hotel information, local attractions, concierge services, and checkout.</li>
+                <li><strong>Real-time Updates:</strong> Staff receive instant notifications for orders and requests.</li>
+                <li><strong>Multi-language Support:</strong> Cater to international guests with automatic language detection.</li>
+            </ul>
+            <h4>Benefits</h4>
+            <ul>
+                <li>Contactless and hygienic guest experience – essential for modern hospitality.</li>
+                <li>Reduced staff workload and improved response times.</li>
+                <li>Increase average order value with upselling prompts and special offers.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal 3 -->
+    <div id="modal-3" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal(event)">&times;</button>
+            <img src="images/loyalty.png" alt="Loyalty Program" class="product-image" />
+            <div class="text-5xl mb-1">💎</div>
+            <h3>Loyalty Program</h3>
+            <p class="mt-2">Branded loyalty cards with a comprehensive points system to retain guests and boost repeat bookings. Design custom rewards, track guest spending, and build lasting relationships with your most valuable customers.</p>
+            <div class="video-thumb" onclick="openYouTube('7KicdxrUmfs')">
+                <img src="images/loyalty.png" alt="Watch Video" />
+                <div class="play-icon"><i class="fas fa-play"></i></div>
+            </div>
+            <h4>Key Features</h4>
+            <ul>
+                <li><strong>Points Accumulation:</strong> Guests earn points on stays, food &amp; beverage, spa, and other services.</li>
+                <li><strong>Reward Redemption:</strong> Redeem points for free nights, room upgrades, dining vouchers, or exclusive experiences.</li>
+                <li><strong>Branded Cards:</strong> Customizable physical and digital loyalty cards with hotel branding and unique QR codes.</li>
+                <li><strong>Guest Engagement:</strong> Automated birthday rewards, anniversary offers, and special promotions.</li>
+                <li><strong>Analytics Dashboard:</strong> Track guest spending patterns, identify top spenders, and optimize loyalty campaigns.</li>
+            </ul>
+            <h4>Benefits</h4>
+            <ul>
+                <li>Improve guest retention and lifetime value by up to 40%.</li>
+                <li>Drive direct bookings and reduce OTA dependency.</li>
+                <li>Build a strong brand community and increase referrals.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal 4 -->
+    <div id="modal-4" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal(event)">&times;</button>
+            <img src="images/checkin.png" alt="Express CheckIN QR" class="product-image" />
+            <div class="text-5xl mb-1">✅</div>
+            <h3>Express CheckIN QR</h3>
+            <p class="mt-2">Streamline the check‑in process with digital forms and secure ID verification. Guests can complete registration, verify identity, and receive digital room keys before they even arrive – eliminating front desk queues.</p>
+            <div class="video-thumb" onclick="openYouTube('80Ye3bz8fjw')">
+                 <img src="images/checkin.png" alt="Watch Video" />
+                <div class="play-icon"><i class="fas fa-play"></i></div>
+            </div>
+            <h4>Key Features</h4>
+            <ul>
+                <li><strong>Digital Registration:</strong> Guests fill out forms digitally before arrival, reducing front desk queues.</li>
+                <li><strong>ID Verification:</strong> Secure scanning of government-issued IDs via guest mobile devices.</li>
+                <li><strong>Contactless Check‑in:</strong> Generate digital room keys and send them directly to guest phones.</li>
+                <li><strong>Pre-registration:</strong> Collect guest preferences and special requests in advance.</li>
+                <li><strong>Paperless Process:</strong> Eliminate manual paperwork and reduce errors.</li>
+            </ul>
+            <h4>Benefits</h4>
+            <ul>
+                <li>Slash front desk wait times by up to 50%.</li>
+                <li>Improve guest arrival experience and first impressions.</li>
+                <li>Enhance security with digital ID verification and audit trails.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal 5 -->
+    <div id="modal-5" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal(event)">&times;</button>
+            <img src="images/waiter.png" alt="Waiter Calling System" class="product-image" />
+            <div class="text-5xl mb-1">🛎️</div>
+            <h3>Waiter Calling System</h3>
+            <p class="mt-2">AI-based tabletop devices that allow guests to request service instantly. With a simple press of a button, waitstaff receive real-time notifications, ensuring faster response times and improved service quality.</p>
+            <div class="video-thumb" onclick="openYouTube('ai-cONdswoc')">
+                <img src="images/waiter.png" alt="Watch Video" />
+                <div class="play-icon"><i class="fas fa-play"></i></div>
+            </div>
+            <h4>Key Features</h4>
+            <ul>
+                <li><strong>One-touch Call:</strong> Guests press a button on the tabletop device to call a waiter instantly.</li>
+                <li><strong>AI Integration:</strong> Smart algorithms route requests to the nearest available staff member.</li>
+                <li><strong>Real-time Alerts:</strong> Waitstaff receive notifications on handheld devices, smartwatches, or POS screens.</li>
+                <li><strong>Service Tracking:</strong> Monitor response times and service quality in real-time.</li>
+                <li><strong>Multi-functional:</strong> Can also be used for bill requests, water refills, and special assistance.</li>
+            </ul>
+            <h4>Benefits</h4>
+            <ul>
+                <li>Improved restaurant service speed and guest satisfaction.</li>
+                <li>Reduce staff movement and optimize workflow.</li>
+                <li>Gain insights into peak service hours and staffing needs.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal 6 -->
+    <div id="modal-6" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal(event)">&times;</button>
+            <img src="images/led.png" alt="Banquet LED Display" class="product-image" />
+            <div class="text-5xl mb-1">🖥️</div>
+            <h3>Banquet LED Display</h3>
+            <p class="mt-2">High-resolution digital displays for banquet events, food menus, and branding. Showcase live food counters, event logos, and promotional content with stunning clarity and real-time updates.</p>
+            <div class="video-thumb" onclick="openYouTube('P5n70FcitQI')">
+                 <img src="images/led.png" alt="Watch Video" />
+                <div class="play-icon"><i class="fas fa-play"></i></div>
+            </div>
+            <h4>Key Features</h4>
+            <ul>
+                <li><strong>Dynamic Menus:</strong> Display live food counters, buffet options, and specialty dishes.</li>
+                <li><strong>Event Branding:</strong> Showcase event logos, sponsor messages, and welcome greetings.</li>
+                <li><strong>Real-time Updates:</strong> Change menus and messages instantly without printing costs.</li>
+                <li><strong>High Visibility:</strong> Bright, clear displays suitable for large banquet halls.</li>
+                <li><strong>Content Management:</strong> Centralized dashboard to manage multiple displays across venues.</li>
+            </ul>
+            <h4>Benefits</h4>
+            <ul>
+                <li>Enhance guest experience with visually appealing displays.</li>
+                <li>Reduce printing costs and waste – go green.</li>
+                <li>Increase upselling opportunities with rotating promotions.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal 7 -->
+    <div id="modal-7" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal(event)">&times;</button>
+            <img src="images/laundry.png" alt="Laundry App" class="product-image" />
+            <div class="text-5xl mb-1">🧺</div>
+            <h3>Laundry App</h3>
+            <p class="mt-2">Mobile app for managing laundry orders with Bluetooth printing and staff assignment. Guests can schedule pickups, track orders, and receive notifications – all from their phone.</p>
+            <div class="video-thumb" onclick="openYouTube('v72eWR2YtBQ')">
+                <img src="images/laundry.png" alt="Watch Video" />
+                <div class="play-icon"><i class="fas fa-play"></i></div>
+            </div>
+            <h4>Key Features</h4>
+            <ul>
+                <li><strong>Guest Ordering:</strong> Guests can schedule laundry pickups and track order status via mobile app.</li>
+                <li><strong>Staff Assignment:</strong> Assign orders to specific staff members with real-time notifications.</li>
+                <li><strong>Bluetooth Printing:</strong> Print laundry tags and receipts directly from the app.</li>
+                <li><strong>Inventory Management:</strong> Track linen and uniform inventory to prevent shortages.</li>
+                <li><strong>Billing Integration:</strong> Automatically add laundry charges to guest folios.</li>
+            </ul>
+            <h4>Benefits</h4>
+            <ul>
+                <li>Streamlined laundry operations and faster turnaround.</li>
+                <li>Improved guest convenience and satisfaction.</li>
+                <li>Accurate tracking and reduced lost items.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal 8: PMS -->
+    <div id="modal-8" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal(event)">&times;</button>
+            <img src="images/pms.png" alt="Property Management System" class="product-image" />
+            <div class="text-5xl mb-1">🏢</div>
+            <h3>Property Management System</h3>
+            <p class="mt-2">Complete cloud-based PMS for hotels, resorts, and serviced apartments. All operations from a single platform – reservations, channel manager, housekeeping, billing, AI voice assistant, and multi-property management.</p>
+            <div class="video-thumb" onclick="openYouTube('v72eWR2YtBQ')">
+                <img src="images/pms.png" alt="Watch Video" />
+                <div class="play-icon"><i class="fas fa-play"></i></div>
+            </div>
+            <h4>Core Modules</h4>
+            <ul>
+                <li><strong>Reservations:</strong> Manage direct and OTA bookings, real‑time inventory, automated confirmations.</li>
+                <li><strong>Channel Manager:</strong> Syncs inventory across all major OTAs, prevents overbooking.</li>
+                <li><strong>Housekeeping:</strong> Room status monitoring, cleaning schedules, maintenance reporting.</li>
+                <li><strong>Food Order Management:</strong> Guest room service, restaurant POS integration, order tracking.</li>
+                <li><strong>Laundry Management:</strong> Request tracking, billing integration, staff assignment.</li>
+                <li><strong>Billing &amp; Invoicing:</strong> Automated GST‑compliant invoices, multiple payment modes, guest folio.</li>
+                <li><strong>Loyalty Program:</strong> Points accumulation and redemption.</li>
+                <li><strong>Reports &amp; Analytics:</strong> Revenue, occupancy, booking trends, department performance.</li>
+                <li><strong>Multi-Property:</strong> Centralized management for multiple hotels.</li>
+            </ul>
+            <h4>AAYLA – AI Voice Assistant</h4>
+            <ul>
+                <li>Voice-controlled hotel intelligence.</li>
+                <li>Commands: "AAYLA, what is today's revenue?" / "AAYLA, show me tomorrow's reservations."</li>
+                <li>Instant access to data, hands-free operation, faster decision-making.</li>
+            </ul>
+            <h4>Benefits</h4>
+            <ul>
+                <li>No heavy initial investment, no AMC charges.</li>
+                <li>Affordable monthly subscription, low running cost.</li>
+                <li>Cloud-based accessibility anytime, anywhere.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal 9: Feedback Box -->
+    <div id="modal-9" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal(event)">&times;</button>
+            <img src="images/feedback.png" alt="Feedback Box" class="product-image" />
+            <div class="text-5xl mb-1">📊</div>
+            <h3>Feedback Box</h3>
+            <p class="mt-2">Physical device with 5 buttons to capture guest satisfaction instantly. Measure your Hotel's Satisfaction Index (TSI) and get real-time insights into guest sentiment.</p>
+            <div class="video-thumb" onclick="openYouTube('qeXSCR-z7GM')">
+                 <img src="images/feedback.png" alt="Watch Video" />
+                <div class="play-icon"><i class="fas fa-play"></i></div>
+            </div>
+            <h4>How It Works</h4>
+            <ul>
+                <li><strong>Excellent Button:</strong> Displays Google Review QR code – encourages 5-star reviews.</li>
+                <li><strong>Good Button:</strong> Displays Google Review QR code – encourages positive reviews.</li>
+                <li><strong>Average Button:</strong> Displays apology message: "We are Sorry, we shall improve on our services."</li>
+                <li><strong>Poor Button:</strong> Displays apology message with commitment to improve.</li>
+                <li><strong>Very Poor Button:</strong> Displays apology message with escalation to management.</li>
+            </ul>
+            <h4>Dashboard &amp; Reporting</h4>
+            <ul>
+                <li>Every button press is logged on the web dashboard in real-time.</li>
+                <li>Generates TSI (Total Satisfaction Index) for the day, week, and month.</li>
+                <li>Detailed graphical reports to understand service levels by department.</li>
+                <li>Know exactly what time which button was pressed – timestamped data.</li>
+                <li>Take corrective actions to prevent future issues.</li>
+            </ul>
+            <h4>Benefits</h4>
+            <ul>
+                <li>Real-time guest sentiment tracking.</li>
+                <li>Improve service quality with actionable data.</li>
+                <li>Increase positive Google reviews.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal 10: RBI -->
+    <div id="modal-10" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal(event)">&times;</button>
+            <img src="images/rbi.png" alt="Recipe Based Inventory" class="product-image" />
+            <div class="text-5xl mb-1">📦</div>
+            <h3>Recipe Based Inventory</h3>
+            <p class="mt-2">Smart inventory system that ensures accurate deduction of raw materials for every food order. Automatically sends day-end deficit reports to stores, creating perfect harmony between your kitchen and store.</p>
+            <div class="video-thumb" onclick="openYouTube('qeXSCR-z7GM')">
+                <img src="images/rbi.png" alt="Watch Video" />
+                <div class="play-icon"><i class="fas fa-play"></i></div>
+            </div>
+            <h4>How It Works</h4>
+            <ul>
+                <li><strong>Guest Places Order:</strong> Every food order is captured accurately via POS or QR system.</li>
+                <li><strong>Kitchen Prepares Food:</strong> Food is prepared as per recipes with precise measurements.</li>
+                <li><strong>RBI System Deducts:</strong> Raw materials are deducted from main inventory instantly.</li>
+                <li><strong>Day-end Deficit Sent to Stores:</strong> At the end of the day, deficit raw materials used are sent to the stores for replenishment.</li>
+            </ul>
+            <h4>Benefits</h4>
+            <ul>
+                <li>Accurate recipe management with standardized portions.</li>
+                <li>Real-time inventory deduction – no manual tracking.</li>
+                <li>Reduce wastage &amp; leakages by up to 15%.</li>
+                <li>Better cost control with precise material usage.</li>
+                <li>Seamless kitchen &amp; store integration.</li>
+                <li>Higher profitability &amp; operational efficiency.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal 11: TRL -->
+    <div id="modal-11" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal(event)">&times;</button>
+            <img src="images/trl.png" alt="Temperature Range Locker" class="product-image" />
+            <div class="text-5xl mb-1">❄️</div>
+            <h3>Temperature Range Locker</h3>
+            <p class="mt-2">Locks your room AC temperature between 22°C to 26°C. Prevents overcooling and saves power. A matchbox-sized device placed on your AC that locks the temperature even if the guest tries to reduce it below 22°C.</p>
+            <div class="video-thumb" onclick="openYouTube('P5n70FcitQI')">
+                <img src="images/trl.png" alt="Watch Video" />
+                <div class="play-icon"><i class="fas fa-play"></i></div>
+            </div>
+            <h4>How It Works</h4>
+            <ul>
+                <li>Matchbox-sized device placed on your AC unit.</li>
+                <li>Receives input from the IR AC Remote Control.</li>
+                <li>Locks the temperature range – guest cannot set below 22°C or above 26°C.</li>
+                <li>Real-time display shows setpoint, room temperature, and power savings.</li>
+            </ul>
+            <h4>Live Financial Impact Dashboard</h4>
+            <ul>
+                <li><strong>Current Cost / Hr:</strong> What it costs if AC is set at 17°C.</li>
+                <li><strong>Actual Cost / Hr:</strong> Actual cost with temperature locked.</li>
+                <li><strong>Actual Savings Rate:</strong> +₹ /hr saved.</li>
+                <li><strong>Real-Time Power Draw:</strong> Instantaneous electrical load across all active rooms.</li>
+                <li><strong>Room-wise Monitoring:</strong> Track each room's setpoint and current temperature.</li>
+            </ul>
+            <h4>Benefits</h4>
+            <ul>
+                <li>Locks temperature between 22-26°C – optimal comfort range.</li>
+                <li>Prevents overcooling – saves more power.</li>
+                <li>Lower energy bills – big savings for hotels.</li>
+                <li>Quick ROI – pays for itself in months.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ===== JavaScript ===== -->
+    <script>
+        // -------- YOUTUBE VIDEO FUNCTION --------
+        function openYouTube(videoId) {
+            if (videoId && videoId !== 'VIDEO_ID_1' && videoId !== 'VIDEO_ID_2' && videoId !== 'VIDEO_ID_3' && videoId !== 'VIDEO_ID_4' && videoId !== 'VIDEO_ID_5' && videoId !== 'VIDEO_ID_6' && videoId !== 'VIDEO_ID_7' && videoId !== 'VIDEO_ID_8' && videoId !== 'VIDEO_ID_9' && videoId !== 'VIDEO_ID_10' && videoId !== 'VIDEO_ID_11') {
+                window.open('https://www.youtube.com/watch?v=' + videoId, '_blank');
+            } else {
+                alert('Please replace this placeholder VIDEO_ID with your actual YouTube video ID.\n\nExample: https://www.youtube.com/watch?v=ABC123 → VIDEO_ID is "ABC123"');
+            }
+        }
+
+        // -------- MODAL FUNCTIONS --------
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal(e) {
+            const overlay = e.target.closest('.modal-overlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            } else {
+                document.querySelectorAll('.modal-overlay.active').forEach(el => el.classList.remove('active'));
+                document.body.style.overflow = 'auto';
+            }
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active').forEach(el => el.classList.remove('active'));
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // -------- COUNTER ANIMATION --------
+        document.addEventListener('DOMContentLoaded', function() {
+            const counters = document.querySelectorAll('.counter');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const el = entry.target;
+                        const target = parseFloat(el.getAttribute('data-target'));
+                        const duration = 2000;
+                        const stepTime = 16;
+                        const steps = duration / stepTime;
+                        const increment = target / steps;
+                        let current = 0;
+                        const timer = setInterval(() => {
+                            current += increment;
+                            if (current >= target) {
+                                current = target;
+                                clearInterval(timer);
+                            }
+                            el.textContent = Math.round(current);
+                        }, stepTime);
+                        observer.unobserve(el);
+                    }
+                });
+            }, { threshold: 0.5 });
+            counters.forEach(c => observer.observe(c));
+        });
+    </script>
+</body>
+</html>
