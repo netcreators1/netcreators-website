@@ -527,6 +527,17 @@
                 &copy; 2026 NetCreators Automation. All rights reserved.
             </div>
         </div>
+        <script>
+    // Force counters to start immediately
+    setTimeout(function() {
+        document.querySelectorAll('.counter').forEach(el => {
+            const target = parseFloat(el.getAttribute('data-target'));
+            if (el.textContent === '0') {
+                el.textContent = target;
+            }
+        });
+    }, 100);
+</script>
     </footer>
 
     <!-- ========================================================== -->
