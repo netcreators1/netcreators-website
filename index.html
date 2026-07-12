@@ -950,33 +950,58 @@
             }
         });
 
-        // -------- COUNTER ANIMATION --------
-        document.addEventListener('DOMContentLoaded', function() {
-            const counters = document.querySelectorAll('.counter');
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const el = entry.target;
-                        const target = parseFloat(el.getAttribute('data-target'));
-                        const duration = 2000;
-                        const stepTime = 16;
-                        const steps = duration / stepTime;
-                        const increment = target / steps;
-                        let current = 0;
-                        const timer = setInterval(() => {
-                            current += increment;
-                            if (current >= target) {
-                                current = target;
-                                clearInterval(timer);
-                            }
-                            el.textContent = Math.round(current);
-                        }, stepTime);
-                        observer.unobserve(el);
-                    }
-                });
-            }, { threshold: 0.5 });
-            counters.forEach(c => observer.observe(c));
+        <!-- ===== COUNTER ANIMATION - FIXED ===== -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to animate a single counter
+        function animateCounter(element) {
+            const target = parseFloat(element.getAttribute('data-target'));
+            const duration = 2000; // 2 seconds
+            const stepTime = 16; // ~60fps
+            const steps = duration / stepTime;
+            const increment = target / steps;
+            let current = 0;
+            
+            // Clear any existing interval
+            if (element._interval) {
+                clearInterval(element._interval);
+            }
+            
+            element._interval = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(element._interval);
+                }
+                element.textContent = Math.round(current);
+            }, stepTime);
+        }
+
+        // Get all counters
+        const counters = document.querySelectorAll('.counter');
+
+        // Option 1: Animate immediately on page load
+        counters.forEach(counter => {
+            animateCounter(counter);
         });
+
+        // Option 2: Also animate when scrolling (for users who scroll away and come back)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    // Only animate if it's still showing 0 or hasn't been animated
+                    if (el.textContent === '0' || el.textContent === '') {
+                        animateCounter(el);
+                    }
+                    observer.unobserve(el);
+                }
+            });
+        }, { threshold: 0.3 });
+
+        counters.forEach(c => observer.observe(c));
+    });
+</script>
         <!-- ===== FORM HANDLING WITH FORMPREE ===== -->
 <script>
     // -------- CONTACT FORM --------
